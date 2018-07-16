@@ -17,8 +17,11 @@ def colorShow(lt):
 map = folium.Map(location=[23.011513, 72.516938], zoom_start=5, tiles='OpenStreetMap')
 
 fg = folium.FeatureGroup(name="My Map")
+# add change circle view
 for lt, lo, st in zip(lat,lon, stat):
-    fg.add_child(folium.Marker(location=[lt, lo], popup=st, icon=folium.Icon(color=colorShow(lt))))
+    fg.add_child(folium.CircleMarker(location=[lt, lo], popup=st, fill_color=colorShow(lt), radius=7, color='grey', fill_opacity=0.7, fill=True))
+# for lt, lo, st in zip(lat,lon, stat):
+#     fg.add_child(folium.CircleMarker(location=[lt, lo], popup=st, icon=folium.Icon(color=colorShow(lt))))
 
 map.add_child(fg)
 
