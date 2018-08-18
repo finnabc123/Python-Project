@@ -1,5 +1,7 @@
 from tkinter import *
-import storeBookBackEnd
+from storeBookBackEnd import Database
+
+database = Database()
 
 def getSelectedRow(event):
     try:
@@ -18,24 +20,24 @@ def getSelectedRow(event):
         pass
 def viewAllCommand():
     list1.delete(0, END)
-    for row in storeBookBackEnd.view():
+    for row in database.view():
         list1.insert(END, row)
 
 def searchCommand():
     list1.delete(0, END)
-    for row in storeBookBackEnd.search(titleText.get(), authorText.get(), yearText.get(), isbnText.get()):
+    for row in database.search(titleText.get(), authorText.get(), yearText.get(), isbnText.get()):
         list1.insert(END, row)
 
 def addCommand():
-    storeBookBackEnd.insert(titleText.get(), authorText.get(), yearText.get(), isbnText.get())
+    database.insert(titleText.get(), authorText.get(), yearText.get(), isbnText.get())
     list1.delete(0, END)
     list1.insert(END, (titleText.get(), authorText.get(), yearText.get(), isbnText.get()))
 
 def deleteCommand():
-    storeBookBackEnd.delete(selectedTupple[0])
+    database.delete(selectedTupple[0])
 
 def updateCommand():
-    storeBookBackEnd.update(selectedTupple[0],titleText.get(), authorText.get(), yearText.get(), isbnText.get())
+    database.update(selectedTupple[0],titleText.get(), authorText.get(), yearText.get(), isbnText.get())
 
 window = Tk()
 window.wm_title('Book Store')
