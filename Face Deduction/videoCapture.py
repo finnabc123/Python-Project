@@ -1,22 +1,63 @@
-import cv2, time
+import cv2, time, pandas
+from datetime import datetime
 
+first_frame = None
+statusList = [None, None]
+times = []
+df = pandas.DataFrame(columns = ["Start", "End"])
 video = cv2.VideoCapture(0)
 
-a=0
 
 while True:
-    a=a+1
     check, frame = video.read()
-    print(check)
-    print(frame)
-
+    status = 0
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    cv2.imshow("Capturing", gray)
+    gray = cv2.GaussianBlur(gray, (21,21), 0)
+    
+
+    if first_frame is None:
+        first_frame = gray
+        continue
+    
+    deltaFram = cv2.absdiff(first_frame, gray)
+    threshFram = cv2.threshold(deltaFram, 30, 255, cv2.THRESH_BINARY)[1]
+    threshFram = cv2.dilate(threshFram, None, iterations=2)
+
+    (_,cnts,_) = cv2.findContours(threshFram.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    for contour in cnts:
+        if cv2.contourArea(contour) < 10000:
+            continue
+        status = 1
+
+        (x, y, w, h) = cv2.boundingRect(contour)
+        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 3)
+    statusList.append(status)
+
+    if statusList[-1] == 1 and statusList[-2] == 0:
+        times.append(datetime.now())
+    if statusList[-1] == 0 and statusList[-2] == 1:
+        times.append(datetime.now())
+    
+    cv2.imshow("Gray Fram", gray)
+    cv2.imshow("Delta Fram", deltaFram)
+    cv2.imshow("Threshold Fram", threshFram)
+    cv2.imshow("Color Fram", frame)
+
     key = cv2.waitKey(1)
 
     if key == ord('q'):
+        if status == 1:
+            times.append(datetime.now())
         break
 
-print(a)
+print(statusList)
+print(times)
+
+for i in range(0, len(times), 2):
+    df = df.append({"Start": times[i], "End": times[i +1]}, ignore_index = True)
+
+df.to_csv("Times.csv")
+
 video.release()
 cv2.destroyAllWindows()
